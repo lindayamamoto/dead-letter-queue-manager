@@ -35,3 +35,10 @@ Most message systems have a built-in dead-letter mechanism, but the wiring is of
 ## The awkward edge you will hit
 
 Event identity is determined by `Object.is` reference equality on the event payload. Two calls to `reject` with the same *shape* but different object references create two queue entries. This is deliberate: deep-cloning or structural comparison would silently coalesce events that are genuinely distinct, and `Object.is` is the only comparison that is both fast and free of surprises for primitive payloads. If you need deduplication, keep one canonical reference per event on your side and reject that.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
